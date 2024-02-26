@@ -4,3 +4,6 @@
 [submodule "web3webdeploy"]
 	path = web3webdeploy
 	url = https://github.com/Plopmenz/web3webdeploy
+[submodule "lib/osx"]
+	path = lib/osx
+	url = https://github.com/aragon/osx
