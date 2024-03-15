@@ -3,11 +3,11 @@ import { Address, DeployInfo, Deployer } from "../web3webdeploy/types";
 import {
   DeployDepartmentSettings,
   deployDepartment,
-} from "./department/Department";
+} from "./internal/Department";
 import {
   DeployDepartmentFactorySettings,
   deployDepartmentFactory,
-} from "./department/DepartmentFactory";
+} from "./internal/DepartmentFactory";
 
 export interface DepartmentDeploymentSettings
   extends Omit<DeployInfo, "contract" | "args"> {

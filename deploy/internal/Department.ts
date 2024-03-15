@@ -1,5 +1,5 @@
 import { Address, Deployer, ExecuteInfo } from "../../web3webdeploy/types";
-import { keccak256, toBytes } from "../../web3webdeploy/node_modules/viem";
+import { keccak256, toBytes } from "viem";
 
 export interface DeployDepartmentSettings
   extends Omit<ExecuteInfo, "abi" | "to" | "function" | "args"> {
