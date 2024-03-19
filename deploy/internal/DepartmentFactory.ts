@@ -1,4 +1,9 @@
-import { Address, DeployInfo, Deployer } from "../../web3webdeploy/types";
+import {
+  Address,
+  Bytes,
+  DeployInfo,
+  Deployer,
+} from "../../web3webdeploy/types";
 
 export interface DeployDepartmentFactorySettings
   extends Omit<DeployInfo, "contract" | "args"> {
@@ -6,6 +11,15 @@ export interface DeployDepartmentFactorySettings
   tagVotingRepo: Address;
   tagManager: Address;
   trustlessManagement: Address;
+  addressTrustlessManagement: Address;
+  optimisticActions: Address;
+  openrd: Address;
+  departmentOwnerSettings: {
+    metadata: Bytes;
+    tokenVoting: Address;
+    token: Address;
+    trustlessManagement: Address;
+  };
 }
 
 export async function deployDepartmentFactory(
@@ -21,6 +35,10 @@ export async function deployDepartmentFactory(
         settings.tagVotingRepo,
         settings.tagManager,
         settings.trustlessManagement,
+        settings.addressTrustlessManagement,
+        settings.optimisticActions,
+        settings.openrd,
+        settings.departmentOwnerSettings,
       ],
       ...settings,
     })

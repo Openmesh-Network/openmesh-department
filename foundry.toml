@@ -4,6 +4,7 @@ out = "out"
 libs = ["lib"]
 remappings = [
     "@aragon/osx-commons-contracts/=lib/osx-commons/contracts/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
     "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
     "@ensdomains/ens-contracts/=lib/ens-contracts/"
 ]
