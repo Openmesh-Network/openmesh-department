@@ -64,7 +64,7 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
     IOptimisticActions public immutable optimsticActions;
 
     /// @notice The address of OpenR&D that will be optimsticly interactable for departments by default.
-    address public immutable openrd;
+    address public immutable openRD;
 
     constructor(
         PluginSetupProcessor _pluginSetupProcessor,
@@ -73,7 +73,7 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
         ITrustlessManagement _trustlessManagement,
         ITrustlessManagement _addressTrustlessManagement,
         IOptimisticActions _optimisticActions,
-        address _openrd,
+        address _openRD,
         DepartmentOwnerSettings memory _departmentOwnerSettings
     ) {
         pluginSetupProcessor = _pluginSetupProcessor;
@@ -82,7 +82,7 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
         trustlessManagement = _trustlessManagement;
         addressTrustlessManagement = _addressTrustlessManagement;
         optimsticActions = _optimisticActions;
-        openrd = _openrd;
+        openRD = _openRD;
 
         daoBase = address(new DAO());
         _createDepartmentOwner(_departmentOwnerSettings);
@@ -229,7 +229,7 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
                 addressTrustlessManagement.changeZoneAccess.selector,
                 address(createdDao),
                 uint160(address(optimsticActions)),
-                openrd,
+                openRD,
                 NO_PERMISSION_CHECKER
             )
         );

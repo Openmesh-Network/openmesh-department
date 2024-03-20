@@ -13,7 +13,7 @@ export interface DeployDepartmentFactorySettings
   trustlessManagement: Address;
   addressTrustlessManagement: Address;
   optimisticActions: Address;
-  openrd: Address;
+  openRD: Address;
   departmentOwnerSettings: {
     metadata: Bytes;
     tokenVoting: Address;
@@ -22,25 +22,47 @@ export interface DeployDepartmentFactorySettings
   };
 }
 
+export interface DeployDepartmentFactoryReturn {
+  departmentFactory: Address;
+  departmentOwner: Address;
+}
+
 export async function deployDepartmentFactory(
   deployer: Deployer,
   settings: DeployDepartmentFactorySettings
-): Promise<Address> {
-  return await deployer
-    .deploy({
-      id: "DepartmentFactory",
-      contract: "DepartmentFactory",
-      args: [
-        settings.pluginSetupProcessor,
-        settings.tagVotingRepo,
-        settings.tagManager,
-        settings.trustlessManagement,
-        settings.addressTrustlessManagement,
-        settings.optimisticActions,
-        settings.openrd,
-        settings.departmentOwnerSettings,
-      ],
-      ...settings,
-    })
-    .then((deployment) => deployment.address);
+): Promise<DeployDepartmentFactoryReturn> {
+  const departmentFactory = await deployer.deploy({
+    id: "DepartmentFactory",
+    contract: "DepartmentFactory",
+    args: [
+      settings.pluginSetupProcessor,
+      settings.tagVotingRepo,
+      settings.tagManager,
+      settings.trustlessManagement,
+      settings.addressTrustlessManagement,
+      settings.optimisticActions,
+      settings.openRD,
+      settings.departmentOwnerSettings,
+    ],
+    ...settings,
+  });
+
+  const events = await deployer.getEvents({
+    abi: "DepartmentFactory",
+    address: departmentFactory.address,
+    eventName: "DepartmentOwnerCreated",
+    logs: departmentFactory.receipt.logs,
+  });
+
+  if (events.length === 0) {
+    throw new Error("DepartmentOwnerCreated event not emitted");
+  }
+
+  const departmentOwner = (
+    events[0].args as any as { departmentOwner: Address }
+  ).departmentOwner;
+  return {
+    departmentFactory: departmentFactory.address,
+    departmentOwner: departmentOwner,
+  };
 }

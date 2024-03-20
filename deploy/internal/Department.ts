@@ -16,7 +16,7 @@ export async function deployDepartment(
   const { receipt } = await deployer.execute({
     abi: "DepartmentFactory",
     to: settings.departmentFactory,
-    function: "createDao",
+    function: "createDepartment",
     args: [metadata, tag],
     ...settings,
   });
