@@ -1,4 +1,3 @@
-import { NetworkDeployment } from "../lib/osx-commons/configs/src";
 import { Address, DeployInfo, Deployer } from "../web3webdeploy/types";
 import {
   DeployDepartmentSettings,
@@ -11,7 +10,6 @@ import {
 
 export interface DepartmentDeploymentSettings
   extends Omit<DeployInfo, "contract" | "args"> {
-  aragonDeployment: NetworkDeployment;
   departmentFactorySettings: DeployDepartmentFactorySettings;
   coreMemberDepartmentSettings?: Omit<
     DeployDepartmentSettings,
@@ -22,6 +20,7 @@ export interface DepartmentDeploymentSettings
 
 export interface DepartmentDeployment {
   departmentFactory: Address;
+  dipsuteDepartment: Address;
   coreMemberDepartment: Address;
 }
 
@@ -41,6 +40,12 @@ export async function deploy(
     settings.departmentFactorySettings
   );
 
+  const dipsuteDepartment = await deployDepartment(deployer, {
+    name: "DISPUTE",
+    departmentFactory: departmentFactory,
+    ...settings.coreMemberDepartmentSettings,
+  });
+
   const coreMemberDepartment = await deployDepartment(deployer, {
     name: "CORE_MEMBER",
     departmentFactory: departmentFactory,
@@ -49,6 +54,7 @@ export async function deploy(
 
   const deployment = {
     departmentFactory: departmentFactory,
+    dipsuteDepartment: dipsuteDepartment,
     coreMemberDepartment: coreMemberDepartment,
   };
   await deployer.saveDeployment({
