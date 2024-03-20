@@ -1,5 +1,4 @@
 import { Address, Deployer, ExecuteInfo } from "../../web3webdeploy/types";
-import { keccak256, toBytes } from "viem";
 
 export interface DeployDepartmentSettings
   extends Omit<ExecuteInfo, "abi" | "to" | "function" | "args"> {
@@ -11,7 +10,7 @@ export async function deployDepartment(
   deployer: Deployer,
   settings: DeployDepartmentSettings
 ): Promise<Address> {
-  const tag = keccak256(toBytes(settings.name));
+  const tag = deployer.viem.keccak256(deployer.viem.toBytes(settings.name));
   const metadata = "";
   const { receipt } = await deployer.execute({
     abi: "DepartmentFactory",
