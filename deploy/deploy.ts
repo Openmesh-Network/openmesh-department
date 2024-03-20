@@ -11,7 +11,7 @@ import {
 export interface DepartmentDeploymentSettings
   extends Omit<DeployInfo, "contract" | "args"> {
   departmentFactorySettings: DeployDepartmentFactorySettings;
-  coreMemberDepartmentSettings?: Omit<
+  departmentSettings?: Omit<
     DeployDepartmentSettings,
     "name" | "departmentFactory"
   >;
@@ -43,13 +43,13 @@ export async function deploy(
   const dipsuteDepartment = await deployDepartment(deployer, {
     name: "DISPUTE",
     departmentFactory: departmentFactory,
-    ...settings.coreMemberDepartmentSettings,
+    ...settings.departmentSettings,
   });
 
   const coreMemberDepartment = await deployDepartment(deployer, {
     name: "CORE_MEMBER",
     departmentFactory: departmentFactory,
-    ...settings.coreMemberDepartmentSettings,
+    ...settings.departmentSettings,
   });
 
   const deployment = {
