@@ -24,7 +24,10 @@ export interface DeployDepartmentFactorySettings
 
 export interface DeployDepartmentFactoryReturn {
   departmentFactory: Address;
-  departmentOwner: Address;
+  departmentOwner: {
+    dao: Address;
+    tokenVoting: Address;
+  };
 }
 
 export async function deployDepartmentFactory(
@@ -47,22 +50,37 @@ export async function deployDepartmentFactory(
     ...settings,
   });
 
-  const events = await deployer.getEvents({
+  const departmentCreatedEvents = await deployer.getEvents({
     abi: "DepartmentFactory",
     address: departmentFactory.address,
     eventName: "DepartmentOwnerCreated",
     logs: departmentFactory.receipt.logs,
   });
-
-  if (events.length === 0) {
+  if (departmentCreatedEvents.length === 0) {
     throw new Error("DepartmentOwnerCreated event not emitted");
   }
-
   const departmentOwner = (
-    events[0].args as any as { departmentOwner: Address }
+    departmentCreatedEvents[0].args as any as { departmentOwner: Address }
   ).departmentOwner;
+
+  const installationPreparedEvents = await deployer.getEvents({
+    abi: "PluginSetupProcessor",
+    address: settings.pluginSetupProcessor,
+    eventName: "InstallationPrepared",
+    logs: departmentFactory.receipt.logs,
+  });
+  if (installationPreparedEvents.length === 0) {
+    throw new Error("InstallationPrepared event not emitted");
+  }
+  const tokenVoting = (
+    installationPreparedEvents[0].args as any as { plugin: Address }
+  ).plugin;
+
   return {
     departmentFactory: departmentFactory.address,
-    departmentOwner: departmentOwner,
+    departmentOwner: {
+      dao: departmentOwner,
+      tokenVoting: tokenVoting,
+    },
   };
 }
