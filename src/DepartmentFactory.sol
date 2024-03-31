@@ -12,10 +12,6 @@ import {
 } from "../lib/osx/packages/contracts/src/framework/plugin/setup/PluginSetupProcessor.sol";
 import {ERC1967Proxy} from "../lib/openzeppelin-contracts-v5/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {
-    TokenVotingSetup,
-    GovernanceERC20
-} from "../lib/osx/packages/contracts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol";
 import {MajorityVotingBase} from "../lib/aragon-tag-voting/src/TagVotingSetup.sol";
 import {ERC721TagManager} from "../lib/tag-manager/src/ERC721TagManager.sol";
 import {ITrustlessManagement, NO_PERMISSION_CHECKER} from "../lib/trustless-management/src/TrustlessManagement.sol";
@@ -25,6 +21,17 @@ import {IVerifiedContributor} from "../lib/verified-contributor/src/IVerifiedCon
 import {OpenmeshENSReverseClaimable} from "../lib/openmesh-admin/src/OpenmeshENSReverseClaimable.sol";
 
 bytes32 constant DEPARTMENT_SETUP_EXECUTION_ID = keccak256("DEPARTMENT_SETUP");
+
+struct TokenSettings {
+    address addr;
+    string name;
+    string symbol;
+}
+
+struct MintSettings {
+    address[] receivers;
+    uint256[] amounts;
+}
 
 contract DepartmentFactory is OpenmeshENSReverseClaimable {
     event DepartmentOwnerCreated(IDAO departmentOwner);
@@ -108,8 +115,8 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
                 MajorityVotingBase.VotingSettings(
                     MajorityVotingBase.VotingMode.EarlyExecution, 50 * 10 ** 4, 20 * 10 ** 4, 1 days, 1
                 ),
-                TokenVotingSetup.TokenSettings(address(_settings.token), "", ""),
-                GovernanceERC20.MintSettings(new address[](0), new uint256[](0))
+                TokenSettings(address(_settings.token), "", ""),
+                MintSettings(new address[](0), new uint256[](0))
             )
         );
 
