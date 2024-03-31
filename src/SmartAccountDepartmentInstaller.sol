@@ -9,7 +9,7 @@ import {
 import {
     ITrustlessManagement, IDAO, NO_PERMISSION_CHECKER
 } from "../lib/trustless-management/src/TrustlessManagement.sol";
-import {IOptimisticActions, IDAO as IOptimsticActionDAO} from "../lib/optimistic-actions/src/IOptimisticActions.sol";
+import {IOptimisticActions, IDAO as IOptimsticActionDAO} from "../lib/trustless-actions/src/IOptimisticActions.sol";
 
 contract SmartAccountDepartmentInstaller {
     event DepartmentInstalled(address indexed department, bytes32 indexed tag);

@@ -37,12 +37,12 @@
 [submodule "lib/tag-manager"]
 	path = lib/tag-manager
 	url = https://github.com/Plopmenz/tag-manager
-[submodule "lib/optimistic-actions"]
-	path = lib/optimistic-actions
-	url = https://github.com/Plopmenz/optimistic-actions
 [submodule "lib/verified-contributor"]
 	path = lib/verified-contributor
 	url = https://github.com/Plopmenz/verified-contributor
 [submodule "lib/smart-account"]
 	path = lib/smart-account
 	url = https://github.com/Plopmenz/smart-account
+[submodule "lib/trustless-actions"]
+	path = lib/trustless-actions
+	url = https://github.com/Plopmenz/trustless-actions

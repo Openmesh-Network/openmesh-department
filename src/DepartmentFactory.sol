@@ -15,7 +15,7 @@ import {ERC1967Proxy} from "../lib/openzeppelin-contracts-v5/contracts/proxy/ERC
 import {MajorityVotingBase} from "../lib/aragon-tag-voting/src/TagVotingSetup.sol";
 import {ERC721TagManager} from "../lib/tag-manager/src/ERC721TagManager.sol";
 import {ITrustlessManagement, NO_PERMISSION_CHECKER} from "../lib/trustless-management/src/TrustlessManagement.sol";
-import {IOptimisticActions} from "../lib/optimistic-actions/src/IOptimisticActions.sol";
+import {IOptimisticActions} from "../lib/trustless-actions/src/IOptimisticActions.sol";
 import {IVerifiedContributor} from "../lib/verified-contributor/src/IVerifiedContributor.sol";
 
 import {OpenmeshENSReverseClaimable} from "../lib/openmesh-admin/src/OpenmeshENSReverseClaimable.sol";
