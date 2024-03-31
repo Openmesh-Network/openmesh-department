@@ -30,6 +30,7 @@
 [submodule "lib/openzeppelin-contracts-v5"]
 	path = lib/openzeppelin-contracts-v5
 	url = https://github.com/openzeppelin/openzeppelin-contracts
+	branch = release-v5.0
 [submodule "lib/trustless-management"]
 	path = lib/trustless-management
 	url = https://github.com/Plopmenz/trustless-management
