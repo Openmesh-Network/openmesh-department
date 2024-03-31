@@ -12,7 +12,7 @@ import {
 import {IOptimisticActions, IDAO as IOptimsticActionDAO} from "../lib/optimistic-actions/src/IOptimisticActions.sol";
 
 contract SmartAccountDepartmentInstaller {
-    event DepartmentInstalled(address department, bytes32 tag);
+    event DepartmentInstalled(address indexed department, bytes32 indexed tag);
 
     /// @notice The smart account module to add execute, which is needed to use trustless management.
     ISmartAccountTrustlessExecution public immutable smartAccountTrustlessExecution;
