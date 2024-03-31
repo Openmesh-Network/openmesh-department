@@ -43,3 +43,6 @@
 [submodule "lib/verified-contributor"]
 	path = lib/verified-contributor
 	url = https://github.com/Plopmenz/verified-contributor
+[submodule "lib/smart-account"]
+	path = lib/smart-account
+	url = https://github.com/Plopmenz/smart-account

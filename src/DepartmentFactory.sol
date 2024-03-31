@@ -37,11 +37,22 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
     event DepartmentOwnerCreated(IDAO departmentOwner);
     event DepartmentCreated(IDAO department, bytes32 tag);
 
+    /// @notice Settings for creating the department owner DAO.
+    /// @param metadata Initial metadata of the DAO.
+    /// @param tokenVoting Aragons Token Voting Repo.
+    /// @param token Verified contributor collection to use for token voting.
+    /// @param trustlessManagement Trustless management solution for creating optimstic actions.
+    /// @param role Role to use for creating optimstic actions.
+    /// @param addressTrustlessManagement Address trustless management for executing optmistic actions.
+    /// @param optimisticActions The optimstic actions implementation.
     struct DepartmentOwnerSettings {
         bytes metadata;
         PluginRepo tokenVoting;
         IVerifiedContributor token;
         ITrustlessManagement trustlessManagement;
+        uint256 role;
+        ITrustlessManagement addressTrustlessManagement;
+        IOptimisticActions optimisticActions;
     }
 
     struct PluginSettings {
@@ -61,35 +72,15 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
     /// @notice The tag manager used for the tag voting plugin installation.
     ERC721TagManager public immutable tagManager;
 
-    /// @notice The implemention used for the trustless management setup.
-    ITrustlessManagement public immutable trustlessManagement;
-
-    /// @notice Address trustless management (for optimstic actions).
-    ITrustlessManagement public immutable addressTrustlessManagement;
-
-    /// @notice The implemention used for the optimstic actions setup.
-    IOptimisticActions public immutable optimsticActions;
-
-    /// @notice The address of OpenR&D that will be optimsticly interactable for departments by default.
-    address public immutable openRD;
-
     constructor(
         PluginSetupProcessor _pluginSetupProcessor,
         PluginRepo _aragonTagVoting,
         ERC721TagManager _tagManager,
-        ITrustlessManagement _trustlessManagement,
-        ITrustlessManagement _addressTrustlessManagement,
-        IOptimisticActions _optimisticActions,
-        address _openRD,
         DepartmentOwnerSettings memory _departmentOwnerSettings
     ) {
         pluginSetupProcessor = _pluginSetupProcessor;
         aragonTagVoting = _aragonTagVoting;
         tagManager = _tagManager;
-        trustlessManagement = _trustlessManagement;
-        addressTrustlessManagement = _addressTrustlessManagement;
-        optimsticActions = _optimisticActions;
-        openRD = _openRD;
 
         daoBase = address(new DAO());
         _createDepartmentOwner(_departmentOwnerSettings);
@@ -105,7 +96,7 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
         createdDao.initialize(_settings.metadata, address(this), address(0), "");
 
         // Grant the temporary permissions.
-        _setupDAOPermissions(createdDao);
+        _setupDAOPermissions(createdDao, true);
 
         // Token Voting
         PluginSettings[] memory pluginSettings = new PluginSettings[](1);
@@ -128,9 +119,9 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
             abi.encodeWithSelector(
                 _settings.trustlessManagement.changeFunctionAccess.selector,
                 address(createdDao),
-                1, // Assumed ERC721CountTrustlessManagement
-                address(optimsticActions),
-                optimsticActions.createAction.selector,
+                _settings.role,
+                address(_settings.optimisticActions),
+                _settings.optimisticActions.createAction.selector,
                 NO_PERMISSION_CHECKER
             )
         );
@@ -140,24 +131,24 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
             abi.encodeWithSelector(
                 _settings.trustlessManagement.changeFunctionAccess.selector,
                 address(createdDao),
-                1, // Assumed ERC721CountTrustlessManagement
-                address(optimsticActions),
-                optimsticActions.rejectAction.selector,
+                _settings.role,
+                address(_settings.optimisticActions),
+                _settings.optimisticActions.rejectAction.selector,
                 NO_PERMISSION_CHECKER
             )
         );
         actions[2] = IDAO.Action(
-            address(optimsticActions),
+            address(_settings.optimisticActions),
             0,
-            abi.encodeWithSelector(optimsticActions.setExecuteDelay.selector, address(createdDao), 7 days)
+            abi.encodeWithSelector(_settings.optimisticActions.setExecuteDelay.selector, address(createdDao), 7 days)
         );
         actions[3] = IDAO.Action(
-            address(addressTrustlessManagement),
+            address(_settings.addressTrustlessManagement),
             0,
             abi.encodeWithSelector(
-                addressTrustlessManagement.changeFunctionAccess.selector,
+                _settings.addressTrustlessManagement.changeFunctionAccess.selector,
                 address(createdDao),
-                uint160(address(optimsticActions)),
+                uint160(address(_settings.optimisticActions)),
                 address(_settings.token),
                 _settings.token.mint.selector,
                 NO_PERMISSION_CHECKER
@@ -166,8 +157,20 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
 
         _installDAOPlugins(createdDao, pluginSettings, actions);
 
+        // Enable trustless management
+        bytes32 executePermission = createdDao.EXECUTE_PERMISSION_ID();
+        PermissionLib.SingleTargetPermission[] memory trustlessManagementPermissions =
+            new PermissionLib.SingleTargetPermission[](2);
+        trustlessManagementPermissions[0] = PermissionLib.SingleTargetPermission(
+            PermissionLib.Operation.Grant, address(_settings.trustlessManagement), executePermission
+        );
+        trustlessManagementPermissions[1] = PermissionLib.SingleTargetPermission(
+            PermissionLib.Operation.Grant, address(_settings.addressTrustlessManagement), executePermission
+        );
+        createdDao.applySingleTargetPermissions(address(createdDao), trustlessManagementPermissions);
+
         // Set the rest of DAO's permissions and revoke the temporary setup ones.
-        _finalizeDAOPermissions(createdDao, address(_settings.trustlessManagement));
+        _finalizeDAOPermissions(createdDao, true);
 
         emit DepartmentOwnerCreated(createdDao);
     }
@@ -183,7 +186,7 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
         createdDao.initialize(_metadata, address(this), address(0), "");
 
         // Grant the temporary permissions.
-        _setupDAOPermissions(createdDao);
+        _setupDAOPermissions(createdDao, false);
 
         // Aragon tag voting
         PluginSettings[] memory pluginSettings = new PluginSettings[](1);
@@ -198,53 +201,11 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
             )
         );
 
-        // Enable 7 day delayed OpenR&D actions
-        IDAO.Action[] memory actions = new IDAO.Action[](4);
-        actions[0] = IDAO.Action(
-            address(trustlessManagement),
-            0,
-            abi.encodeWithSelector(
-                trustlessManagement.changeFunctionAccess.selector,
-                address(createdDao),
-                _tag, // Assumed TagTrustlessManagement
-                address(optimsticActions),
-                optimsticActions.createAction.selector,
-                NO_PERMISSION_CHECKER
-            )
-        );
-        actions[1] = IDAO.Action(
-            address(trustlessManagement),
-            0,
-            abi.encodeWithSelector(
-                trustlessManagement.changeFunctionAccess.selector,
-                address(createdDao),
-                _tag, // Assumed TagTrustlessManagement
-                address(optimsticActions),
-                optimsticActions.rejectAction.selector,
-                NO_PERMISSION_CHECKER
-            )
-        );
-        actions[2] = IDAO.Action(
-            address(optimsticActions),
-            0,
-            abi.encodeWithSelector(optimsticActions.setExecuteDelay.selector, address(createdDao), 7 days)
-        );
-        actions[3] = IDAO.Action(
-            address(addressTrustlessManagement),
-            0,
-            abi.encodeWithSelector(
-                addressTrustlessManagement.changeZoneAccess.selector,
-                address(createdDao),
-                uint160(address(optimsticActions)),
-                openRD,
-                NO_PERMISSION_CHECKER
-            )
-        );
-
+        IDAO.Action[] memory actions = new IDAO.Action[](0);
         _installDAOPlugins(createdDao, pluginSettings, actions);
 
         // Set the rest of DAO's permissions and revoke the temporary setup ones.
-        _finalizeDAOPermissions(createdDao, address(trustlessManagement));
+        _finalizeDAOPermissions(createdDao, false);
 
         // Allow the department to manage their own tag.
         tagManager.grantRole(_tag, address(createdDao));
@@ -288,33 +249,40 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
         // Revoke `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` from this `DAOFactory` .
         _dao.revoke(address(pluginSetupProcessor), address(this), applyInstallationPermissionID);
 
-        // Perform any other setup actions
-        _dao.execute(DEPARTMENT_SETUP_EXECUTION_ID, _actions, 0);
+        if (_actions.length != 0) {
+            // Perform any other setup actions
+            _dao.execute(DEPARTMENT_SETUP_EXECUTION_ID, _actions, 0);
+        }
     }
 
     /// @notice Sets the required permissions for the setup.
     /// @param _dao The DAO instance just created.
-    function _setupDAOPermissions(DAO _dao) internal {
+    /// @param _grantExecute If the setup involves executing actions as the DAO.
+    function _setupDAOPermissions(DAO _dao, bool _grantExecute) internal {
         // Set permissionIds on the dao itself.
-        PermissionLib.SingleTargetPermission[] memory items = new PermissionLib.SingleTargetPermission[](2);
+        PermissionLib.SingleTargetPermission[] memory items =
+            new PermissionLib.SingleTargetPermission[](_grantExecute ? 2 : 1);
 
         // Grant all setup permissions required
         items[0] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant, address(pluginSetupProcessor), _dao.ROOT_PERMISSION_ID()
         );
-        items[1] = PermissionLib.SingleTargetPermission(
-            PermissionLib.Operation.Grant, address(this), _dao.EXECUTE_PERMISSION_ID()
-        );
+        if (_grantExecute) {
+            items[1] = PermissionLib.SingleTargetPermission(
+                PermissionLib.Operation.Grant, address(this), _dao.EXECUTE_PERMISSION_ID()
+            );
+        }
 
         _dao.applySingleTargetPermissions(address(_dao), items);
     }
 
     /// @notice Sets the required permissions for the new DAO and revokes the setup permissions.
     /// @param _dao The DAO instance just created.
-    /// @param _trustlessManagement The trustless management instance to active (in addition to address trustless management).
-    function _finalizeDAOPermissions(DAO _dao, address _trustlessManagement) internal {
+    /// @param _revokeExecute If the setup was granted temporary execute permission.
+    function _finalizeDAOPermissions(DAO _dao, bool _revokeExecute) internal {
         // Set permissionIds on the dao itself.
-        PermissionLib.SingleTargetPermission[] memory items = new PermissionLib.SingleTargetPermission[](6);
+        PermissionLib.SingleTargetPermission[] memory items =
+            new PermissionLib.SingleTargetPermission[](_revokeExecute ? 4 : 3);
 
         bytes32 rootPermission = _dao.ROOT_PERMISSION_ID();
         bytes32 executePermission = _dao.EXECUTE_PERMISSION_ID();
@@ -322,20 +290,15 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
         // Grant admin all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(PermissionLib.Operation.Grant, address(_dao), rootPermission);
 
-        // Enable trustless management
-        items[1] = PermissionLib.SingleTargetPermission(
-            PermissionLib.Operation.Grant, address(addressTrustlessManagement), executePermission
-        );
-        items[2] =
-            PermissionLib.SingleTargetPermission(PermissionLib.Operation.Grant, _trustlessManagement, executePermission);
-
         // Revoke setup granted permissions
-        items[3] = PermissionLib.SingleTargetPermission(
+        items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Revoke, address(pluginSetupProcessor), rootPermission
         );
-        items[4] = PermissionLib.SingleTargetPermission(PermissionLib.Operation.Revoke, address(this), rootPermission);
-        items[5] =
-            PermissionLib.SingleTargetPermission(PermissionLib.Operation.Revoke, address(this), executePermission);
+        items[2] = PermissionLib.SingleTargetPermission(PermissionLib.Operation.Revoke, address(this), rootPermission);
+        if (_revokeExecute) {
+            items[3] =
+                PermissionLib.SingleTargetPermission(PermissionLib.Operation.Revoke, address(this), executePermission);
+        }
 
         _dao.applySingleTargetPermissions(address(_dao), items);
     }

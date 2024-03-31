@@ -10,15 +10,14 @@ export interface DeployDepartmentFactorySettings
   pluginSetupProcessor: Address;
   tagVotingRepo: Address;
   tagManager: Address;
-  trustlessManagement: Address;
-  addressTrustlessManagement: Address;
-  optimisticActions: Address;
-  openRD: Address;
   departmentOwnerSettings: {
     metadata: Bytes;
     tokenVoting: Address;
     token: Address;
     trustlessManagement: Address;
+    role: bigint;
+    addressTrustlessManagement: Address;
+    optimisticActions: Address;
   };
 }
 
@@ -41,10 +40,6 @@ export async function deployDepartmentFactory(
       settings.pluginSetupProcessor,
       settings.tagVotingRepo,
       settings.tagManager,
-      settings.trustlessManagement,
-      settings.addressTrustlessManagement,
-      settings.optimisticActions,
-      settings.openRD,
       settings.departmentOwnerSettings,
     ],
     ...settings,
