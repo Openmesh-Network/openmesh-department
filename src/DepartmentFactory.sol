@@ -207,9 +207,6 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
         // Set the rest of DAO's permissions and revoke the temporary setup ones.
         _finalizeDAOPermissions(createdDao, false);
 
-        // Allow the department to manage their own tag.
-        tagManager.grantRole(_tag, address(createdDao));
-
         emit DepartmentCreated(createdDao, _tag);
     }
 
