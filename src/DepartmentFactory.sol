@@ -100,8 +100,10 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
 
         // Token Voting
         PluginSettings[] memory pluginSettings = new PluginSettings[](1);
+        uint8 release = _settings.tokenVoting.latestRelease();
+        uint16 version = uint16(_settings.tokenVoting.buildCount(release));
         pluginSettings[0] = PluginSettings(
-            PluginSetupRef(PluginRepo.Tag(1, 1), _settings.tokenVoting),
+            PluginSetupRef(PluginRepo.Tag(release, version), _settings.tokenVoting),
             abi.encode(
                 MajorityVotingBase.VotingSettings(
                     MajorityVotingBase.VotingMode.EarlyExecution, 50 * 10 ** 4, 20 * 10 ** 4, 1 days, 1
@@ -190,8 +192,10 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
 
         // Aragon tag voting
         PluginSettings[] memory pluginSettings = new PluginSettings[](1);
+        uint8 release = aragonTagVoting.latestRelease();
+        uint16 version = uint16(aragonTagVoting.buildCount(release));
         pluginSettings[0] = PluginSettings(
-            PluginSetupRef(PluginRepo.Tag(1, 1), aragonTagVoting),
+            PluginSetupRef(PluginRepo.Tag(release, version), aragonTagVoting),
             abi.encode(
                 MajorityVotingBase.VotingSettings(
                     MajorityVotingBase.VotingMode.EarlyExecution, 50 * 10 ** 4, 20 * 10 ** 4, 1 days, 1
