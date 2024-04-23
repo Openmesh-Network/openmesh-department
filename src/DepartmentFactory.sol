@@ -41,10 +41,10 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
     /// @param metadata Initial metadata of the DAO.
     /// @param tokenVoting Aragons Token Voting Repo.
     /// @param token Verified contributor collection to use for token voting.
-    /// @param trustlessManagement Trustless management solution for creating optimstic actions.
-    /// @param role Role to use for creating optimstic actions.
-    /// @param addressTrustlessManagement Address trustless management for executing optmistic actions.
-    /// @param optimisticActions The optimstic actions implementation.
+    /// @param trustlessManagement Trustless management solution for creating optimistic actions.
+    /// @param role Role to use for creating optimistic actions.
+    /// @param addressTrustlessManagement Address trustless management for executing optimistic actions.
+    /// @param optimisticActions The optimistic actions implementation.
     struct DepartmentOwnerSettings {
         bytes metadata;
         PluginRepo tokenVoting;
@@ -113,7 +113,7 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
             )
         );
 
-        // Enable 7 day delayed optmistic token minting
+        // Enable 7 day delayed optimistic token minting
         IDAO.Action[] memory actions = new IDAO.Action[](4);
         actions[0] = IDAO.Action(
             address(_settings.trustlessManagement),
@@ -178,7 +178,7 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
     }
 
     /// @notice Creates a new DAO according to the Department specification.
-    /// @param _metadata The metadata the DAO should be initilized with.
+    /// @param _metadata The metadata the DAO should be initialized with.
     /// @param _tag The tag that defines the members of the DAO.
     function createDepartment(bytes calldata _metadata, bytes32 _tag) external returns (DAO createdDao) {
         // Create DAO.
@@ -221,7 +221,7 @@ contract DepartmentFactory is OpenmeshENSReverseClaimable {
         // Get Permission IDs
         bytes32 applyInstallationPermissionID = pluginSetupProcessor.APPLY_INSTALLATION_PERMISSION_ID();
 
-        // Grant Temporarly `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` to this `DAOFactory`.
+        // Grant Temporary `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` to this `DAOFactory`.
         _dao.grant(address(pluginSetupProcessor), address(this), applyInstallationPermissionID);
 
         // Install Aragon OSx plugins on the newly created DAO.

@@ -9,7 +9,7 @@ import {
 import {
     ITrustlessManagement, IDAO, NO_PERMISSION_CHECKER
 } from "../lib/trustless-management/src/TrustlessManagement.sol";
-import {IOptimisticActions, IDAO as IOptimsticActionDAO} from "../lib/trustless-actions/src/IOptimisticActions.sol";
+import {IOptimisticActions, IDAO as IOptimisticActionDAO} from "../lib/trustless-actions/src/IOptimisticActions.sol";
 
 contract SmartAccountDepartmentInstaller {
     event DepartmentInstalled(address indexed department, bytes32 indexed tag);
@@ -17,16 +17,16 @@ contract SmartAccountDepartmentInstaller {
     /// @notice The smart account module to add execute, which is needed to use trustless management.
     ISmartAccountTrustlessExecution public immutable smartAccountTrustlessExecution;
 
-    /// @notice Address trustless management (for creating optimstic actions).
+    /// @notice Address trustless management (for creating optimistic actions).
     ITrustlessManagement public immutable tagTrustlessManagement;
 
-    /// @notice Address trustless management (for executing optimstic actions).
+    /// @notice Address trustless management (for executing optimistic actions).
     ITrustlessManagement public immutable addressTrustlessManagement;
 
     /// @notice The optimstic actions implementation.
     IOptimisticActions public immutable optimisticActions;
 
-    /// @notice The address of OpenR&D that will be optimsticly interactable for departments by default.
+    /// @notice The address of OpenR&D that will be optimisticly interactable for departments by default.
     address public immutable openRD;
 
     constructor(
@@ -51,7 +51,7 @@ contract SmartAccountDepartmentInstaller {
         SmartAccountTrustlessExecutionLib.setExecutePermission(address(tagTrustlessManagement), true);
         SmartAccountTrustlessExecutionLib.setExecutePermission(address(addressTrustlessManagement), true);
 
-        // Set trustless management permissions and optmistic actions delay.
+        // Set trustless management permissions and optimistic actions delay.
         tagTrustlessManagement.changeFunctionAccess(
             IDAO(address(this)),
             uint256(_tag),
@@ -66,7 +66,7 @@ contract SmartAccountDepartmentInstaller {
             optimisticActions.rejectAction.selector,
             NO_PERMISSION_CHECKER
         );
-        optimisticActions.setExecuteDelay(IOptimsticActionDAO(address(this)), 7 days);
+        optimisticActions.setExecuteDelay(IOptimisticActionDAO(address(this)), 7 days);
         addressTrustlessManagement.changeZoneAccess(
             IDAO(address(this)), uint160(address(optimisticActions)), openRD, NO_PERMISSION_CHECKER
         );
