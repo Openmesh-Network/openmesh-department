@@ -9,7 +9,7 @@
 	url = https://github.com/aragon/osx
 [submodule "lib/openmesh-admin"]
 	path = lib/openmesh-admin
-	url = https://github.com/Plopmenz/openmesh-admin
+	url = https://github.com/Openmesh-Network/openmesh-admin
 [submodule "lib/openzeppelin-contracts"]
 	path = lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
@@ -39,7 +39,7 @@
 	url = https://github.com/Plopmenz/tag-manager
 [submodule "lib/verified-contributor"]
 	path = lib/verified-contributor
-	url = https://github.com/Plopmenz/verified-contributor
+	url = https://github.com/Openmesh-Network/verified-contributor
 [submodule "lib/smart-account"]
 	path = lib/smart-account
 	url = https://github.com/Plopmenz/smart-account
